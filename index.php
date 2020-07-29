@@ -1,7 +1,9 @@
 <?php
 
-//part 10 https://www.youtube.com/watch?v=nbF4hWJ1hJA&list=PLriKzYyLb28kR_CPMz8uierDWC2y3znI2&index=11   - 00
+// git https://github.com/Alecaddd/WordPressPlugin101/blob/master/Lesson11/alecaddd-plugin.php
 
-//https://devanswers.co/install-composer-php-windows-10/  not install composer
+//install composer https://qna.habr.com/q/281663
 
-//https://www.youtube.com/watch?v=NdDRNiIfYDw
+//запуск команд  php composer.phar init
+
+//part 12 https://www.youtube.com/watch?v=uxtGCt7hOps   4.35

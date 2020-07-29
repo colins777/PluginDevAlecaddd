@@ -1,9 +1,7 @@
 <?php
-
 /**
- * @package AlecadddPlugin
+ * @package  AlecadddPlugin
  */
-
 namespace Inc\Base;
 
 class Deactivate

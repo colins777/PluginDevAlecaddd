@@ -1,12 +1,10 @@
 <?php
-
 /**
- * @package AlecadddPlugin
+ * @package  AlecadddPlugin
  */
-
 namespace Inc\Base;
 
-class AlecaddActivate
+class Activate
 {
     public static function activate() {
         flush_rewrite_rules();

@@ -1,0 +1,17 @@
+{
+    "name": "colins/alecaddd-plugin",
+    "description": "alecadd plugin",
+    "type": "project",
+    "license": "GPL",
+    "authors": [
+        {
+            "name": "colins777",
+            "email": "rumyga@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+    	"psr-4": {"Inc\\": "./inc"}
+    }
+}
