@@ -13,7 +13,7 @@ final class Init
     public static function get_services()
     {
 
-        //підключаємо всі необхідні класи для активації через масив
+        //підключаємо всі необхідні класи для активації через маpсив
         return [
             Pages\Admin::class,
             Base\Enqueue::class,
