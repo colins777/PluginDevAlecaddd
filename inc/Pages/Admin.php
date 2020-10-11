@@ -4,18 +4,37 @@
  */
 namespace Inc\Pages;
 
-use \Inc\Base\BaseController;
 use \Inc\Api\SettingsApi;
+use \Inc\Base\BaseController;
+use \Inc\Api\Callbacks\AdminCallbacks;
 /**
  *
  */
 class Admin extends  BaseController
 {
     public $settings;
-    public function __construct()
-    {
+
+    public $callbacks;
+
+    public $pages = array();
+
+    public $subpages = array();
+
+
+    public function register() {
+
         $this->settings = new SettingsApi();
 
+        $this->callbacks = new AdminCallbacks();
+
+        $this->setPages();
+
+        $this->setSubpages();
+
+        $this->settings->addPages($this->pages)->withSubPage('Dashboard')->addSubPages($this->subpages)->register();
+    }
+
+    public function setPages () {
         //можливість додавання необмеженої к-ті м-ню в адмінку через масив
         $this->pages = array(
             [
@@ -23,32 +42,34 @@ class Admin extends  BaseController
                 'menu_title' => 'Alecaddd',
                 'capability' => 'manage_options',
                 'menu_slug' => 'alecaddd_plugin',
-                'callback' => function () { echo '<h1>TEST Plugin</h1>';},
+                'callback' => array($this->callbacks, 'adminDashboard'),
                 'icon_url' => 'dashicons-store',
                 'position' => 110
             ],
-            [
-                'page_title' => 'TEST Alecaddd Plugin',
-                'menu_title' => 'TEST Alecaddd',
-                'capability' => 'manage_options',
-                'menu_slug' => 'TEST  alecaddd_plugin',
-                'callback' => function () { echo '<h1>TEST Plugin</h1>';},
-                'icon_url' => 'dashicons-external',
-                'position' => 110
-            ]
         );
     }
 
-    public function register() {
-        //add_action( 'admin_menu', array( $this, 'add_admin_pages' ) );
-        $this->settings->addPages($this->pages)->register();
+    public function setSubpages () {
+        $this->subpages = array(
+            array(
+                'parent_slug' => 'alecaddd_plugin',
+                'page_title' => 'Custom Post Types',
+                'menu_title' => 'CPT',
+                'capability' => 'manage_options',
+                'menu_slug' => 'alecaddd_cpt',
+                'callback' => function () { echo '<h1>CPT Manager</h1>';}
+            ),
+            array(
+                'parent_slug' => 'alecaddd_plugin',
+                'page_title' => 'Custom Widjets',
+                'menu_title' => 'Widjets',
+                'capability' => 'manage_widjets',
+                'menu_slug' => 'alecaddd__widjets',
+                'callback' => function () { echo '<h1>Widjet Manager</h1>';}
+            ),
+
+        );
     }
 
-//    public function add_admin_pages() {
-//        add_menu_page( 'Alecaddd Plugin', 'Alecaddd', 'manage_options', 'alecaddd_plugin', array( $this, 'admin_index' ), 'dashicons-store', 110 );
-//    }
 
-    public function admin_index() {
-        require_once $this->plugin_path . 'templates/admin.php';
-    }
 }
