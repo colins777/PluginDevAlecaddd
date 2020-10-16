@@ -6,4 +6,4 @@
 
 //запуск команд  php composer.phar init
 
-//part 17a https://www.youtube.com/watch?v=QYt5Ry3os88  9.21
+//part 17b https://www.youtube.com/watch?v=GvXqxQYSREQ - 13.22

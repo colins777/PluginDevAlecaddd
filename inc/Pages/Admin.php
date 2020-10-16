@@ -4,52 +4,61 @@
  */
 namespace Inc\Pages;
 
-use \Inc\Api\SettingsApi;
-use \Inc\Base\BaseController;
-use \Inc\Api\Callbacks\AdminCallbacks;
+use Inc\Api\SettingsApi;
+use Inc\Base\BaseController;
+use Inc\Api\Callbacks\AdminCallbacks;
+use Inc\Api\Callbacks\ManagerCallbacks;
+
 /**
  *
  */
-class Admin extends  BaseController
+class Admin extends BaseController
 {
     public $settings;
 
     public $callbacks;
 
+    public $callbacks_mngr;
+
     public $pages = array();
 
     public $subpages = array();
 
-
-    public function register() {
-
+    public function register()
+    {
         $this->settings = new SettingsApi();
 
         $this->callbacks = new AdminCallbacks();
+        $this->callbacks_mngr = new ManagerCallbacks();
 
         $this->setPages();
 
         $this->setSubpages();
 
-        $this->settings->addPages($this->pages)->withSubPage('Dashboard')->addSubPages($this->subpages)->register();
+        $this->setSettings();
+        $this->setSections();
+        $this->setFields();
+
+        $this->settings->addPages( $this->pages )->withSubPage( 'Dashboard' )->addSubPages( $this->subpages )->register();
     }
 
-    public function setPages () {
-        //можливість додавання необмеженої к-ті м-ню в адмінку через масив
+    public function setPages()
+    {
         $this->pages = array(
-            [
+            array(
                 'page_title' => 'Alecaddd Plugin',
                 'menu_title' => 'Alecaddd',
                 'capability' => 'manage_options',
                 'menu_slug' => 'alecaddd_plugin',
-                'callback' => array($this->callbacks, 'adminDashboard'),
+                'callback' => array( $this->callbacks, 'adminDashboard' ),
                 'icon_url' => 'dashicons-store',
                 'position' => 110
-            ],
+            )
         );
     }
 
-    public function setSubpages () {
+    public function setSubpages()
+    {
         $this->subpages = array(
             array(
                 'parent_slug' => 'alecaddd_plugin',
@@ -57,19 +66,227 @@ class Admin extends  BaseController
                 'menu_title' => 'CPT',
                 'capability' => 'manage_options',
                 'menu_slug' => 'alecaddd_cpt',
-                'callback' => function () { echo '<h1>CPT Manager</h1>';}
+                'callback' => array( $this->callbacks, 'adminCpt' )
             ),
             array(
                 'parent_slug' => 'alecaddd_plugin',
-                'page_title' => 'Custom Widjets',
-                'menu_title' => 'Widjets',
-                'capability' => 'manage_widjets',
-                'menu_slug' => 'alecaddd__widjets',
-                'callback' => function () { echo '<h1>Widjet Manager</h1>';}
+                'page_title' => 'Custom Taxonomies',
+                'menu_title' => 'Taxonomies',
+                'capability' => 'manage_options',
+                'menu_slug' => 'alecaddd_taxonomies',
+                'callback' => array( $this->callbacks, 'adminTaxonomy' )
             ),
-
+            array(
+                'parent_slug' => 'alecaddd_plugin',
+                'page_title' => 'Custom Widgets',
+                'menu_title' => 'Widgets',
+                'capability' => 'manage_options',
+                'menu_slug' => 'alecaddd_widgets',
+                'callback' => array( $this->callbacks, 'adminWidget' )
+            )
         );
     }
 
+    public function setSettings()
+    {
 
+        $args = array();
+
+        foreach ( $this->managers as $key => $value ) {
+            //var_dump($key);
+            $args[] = array(
+                'option_group' => 'alecaddd_plugin_settings',
+                'option_name' => $key,
+                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+            );
+        }
+
+//        $args = array(
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'cpt_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'taxonomy_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'media_widget',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'gallery_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'testimonial_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'templates_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'login_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'membership_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//            array(
+//                'option_group' => 'alecaddd_plugin_settings',
+//                'option_name' => 'chat_manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxSanitize' )
+//            ),
+//        );
+
+        $this->settings->setSettings( $args );
+    }
+
+    public function setSections()
+    {
+        $args = array(
+            array(
+                'id' => 'alecaddd_admin_index',
+                'title' => 'Settings Manager',
+                'callback' => array( $this->callbacks_mngr, 'adminSectionManager' ),
+                'page' => 'alecaddd_plugin'
+            )
+        );
+
+        $this->settings->setSections( $args );
+    }
+
+    public function setFields()
+    {
+        foreach ( $this->managers as $key => $value ) {
+            //var_dump($key);
+            $args[] = array(
+                'id' => $key,
+                'title' => $value,
+                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+                'page' => 'alecaddd_plugin',
+                'section' => 'alecaddd_admin_index',
+                'args' => array(
+                    'label_for' => $key,
+                    'class' => 'ui-toggle'
+                )
+            );
+        }
+
+//        $args = array(
+//            array(
+//                'id' => 'cpt_manager',
+//                'title' => 'Activate CPT Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'cpt_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'taxonomy_manager',
+//                'title' => 'Activate Taxonomy Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'taxonomy_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'media_widget',
+//                'title' => 'Activate Media Widget',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'media_widget',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'gallery_manager',
+//                'title' => 'Activate Gallery Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'gallery_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'testimonial_manager',
+//                'title' => 'Activate Testimonial Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'testimonial_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'templates_manager',
+//                'title' => 'Activate templates Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'templates_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'login_manager',
+//                'title' => 'Activate Login Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'login_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'membership_manager',
+//                'title' => 'Activate membership Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'membership_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//            array(
+//                'id' => 'chat_manager',
+//                'title' => 'Activate Chat Manager',
+//                'callback' => array( $this->callbacks_mngr, 'checkboxField' ),
+//                'page' => 'alecaddd_plugin',
+//                'section' => 'alecaddd_admin_index',
+//                'args' => array(
+//                    'label_for' => 'chat_manager',
+//                    'class' => 'ui-toggle'
+//                )
+//            ),
+//
+//
+//        );
+
+        $this->settings->setFields( $args );
+    }
 }
